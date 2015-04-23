@@ -1,0 +1,26 @@
+<h1>Oh hai!</h1>
+<p>Please enter a zipcode.</p>
+<input type="text" id='zipInput'></input>
+<button onclick="getLocation()">Get it!</button>
+
+<h3>WOW...you're in <span id="zipCode"></span></h3>
+
+<script type="text/javascript">
+function getLocation(){
+	debugger;
+	var client = new XMLHttpRequest();
+	var currZip = document.getElementById('zipInput').value;
+	client.open("GET", "http://api.zippopotam.us/us/" + currZip, true);
+	client.onreadystatechange = function() {
+		if(client.readyState == 4) {
+			debugger;
+			var span = document.getElementById('zipCode');
+			span.innerHTML = client.responseText;
+		};
+	};	
+
+	client.send();
+}
+
+
+</script>
