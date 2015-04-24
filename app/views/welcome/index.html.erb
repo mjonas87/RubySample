@@ -1,26 +1,52 @@
-<h1>Oh hai!</h1>
-<p>Please enter a zipcode.</p>
-<input type="text" id='zipInput'></input>
-<button onclick="getLocation()">Get it!</button>
-
-<h3>WOW...you're in <span id="zipCode"></span></h3>
+<%= form_tag(controller: "location", action: "create", method: "post") do %>
+	<h1>Oh hai!</h1>
+	<p>Please enter a zipcode.</p>
+	<input type="text" id="zip" name="zip" onkeyup="getLocation()"></input>
+	<input id="name" name="name" type="hidden"></input>
+	<span style="color:red;" id="errorMessage"></span>
+	<h3 id='zipCodeContainer' style='visibility:hidden'>WOW...you're in <span id="zipCode"></span></h3>
+	<input id="saveButton" type="submit" value="Save it!" style='visibility:hidden'/>
+<% end %>
 
 <script type="text/javascript">
 function getLocation(){
-	debugger;
-	var client = new XMLHttpRequest();
-	var currZip = document.getElementById('zipInput').value;
-	client.open("GET", "http://api.zippopotam.us/us/" + currZip, true);
-	client.onreadystatechange = function() {
-		if(client.readyState == 4) {
-			debugger;
-			var span = document.getElementById('zipCode');
-			span.innerHTML = client.responseText;
-		};
-	};	
+	var errMsg = document.getElementById('errorMessage');
+	var zipContainer = document.getElementById('zipCodeContainer');
+	var saveButton = document.getElementById('saveButton');
+	var nameInput = document.getElementById('name');
+	var currZip = document.getElementById('zip').value;
 
-	client.send();
+	errMsg.innerHTML = '';
+	saveButton.style.visibility = 'hidden';
+	zipContainer.style.visibility = 'hidden';
+
+	if(currZip.length == 5){
+		var client = new XMLHttpRequest();
+		client.open("GET", "http://api.zippopotam.us/us/" + currZip, true);
+		client.onreadystatechange = function() {
+			if(client.readyState == 4) {
+				var span = document.getElementById('zipCode');
+				var data = JSON.parse(client.responseText);
+
+				if(typeof data !== 'object'){
+					errMsg.innerHTML = 'There is an issue with the system at the moment. Please try again later.'
+				}
+
+				if(!data.places || data.places.length == 0){
+					errMsg.innerHTML = 'Location not found.'
+				}else{
+					span.innerHTML = data.places[0]['place name'];
+					nameInput.value = data.places[0]['place name'];
+
+					saveButton.style.visibility = 'visible';
+					zipContainer.style.visibility = 'visible';
+				}
+			};
+		};	
+
+		client.send();
+	}else if (currZip.length > 5){
+		errMsg.innerHTML = "Max zipcode length is 5.";
+	}
 }
-
-
 </script>
